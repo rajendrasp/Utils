@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <thread>
+#include <sstream>
 
 inline auto Trace(wchar_t const* format, ...) -> void
 {
@@ -31,7 +32,7 @@ struct Tracer
     Tracer(char const* filename, unsigned const line, char const* functionname) :
         m_filename{ filename },
         m_line{ line },
-        m_functionname{functionname}
+        m_functionname{ functionname }
     {
 
     }
@@ -42,12 +43,16 @@ struct Tracer
         wchar_t buffer[256];
 
         std::thread::id this_id = std::this_thread::get_id();
+        std::stringstream ss;
+        ss << this_id;
+        std::string thread_id = ss.str();
 
         auto count = swprintf_s(buffer,
-                                L"DEBUG_TRACING %S(%d)%S: ",
-                                m_filename,
-                                m_line,
-                                m_functionname);
+            L"DEBUG_TRACING Thread: %S %S(%d)%S: ",
+            thread_id.c_str(),
+            m_filename,
+            m_line,
+            m_functionname);
 
         //ASSERT(-1 != count);
 
@@ -59,7 +64,7 @@ struct Tracer
 
         OutputDebugString(buffer);
     }
-};  
+};
 
 #define MYOWNTRACEMINE Tracer(__FILE__, __LINE__, __FUNCTION__)
 
